@@ -24,7 +24,7 @@ namespace Pidgin.Examples.Json
         private static readonly Parser<char, IJson> JsonString =
             String.Select<IJson>(s => new JsonString(s));
             
-        private static readonly Parser<char, IJson> Json =
+        public static Parser<char, IJson> Json { get; } =
             JsonString.Or(Rec(() => JsonArray)).Or(Rec(() => JsonObject));
 
         private static readonly Parser<char, IJson> JsonArray = 

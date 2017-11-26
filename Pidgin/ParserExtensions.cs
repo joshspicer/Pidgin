@@ -85,17 +85,12 @@ namespace Pidgin
         public static Result<char, T> Parse<T>(this Parser<char, T> parser, TextReader input, Func<char, SourcePos, SourcePos> calculatePos = null)
             => DoParse(parser, new ReaderParseState(input, calculatePos ?? Parser.DefaultCharPosCalculator));
         
-        private static Result<TToken, T> DoParse<TToken, T>(Parser<TToken, T> parser, IParseState<TToken> state)
+        internal static Result<TToken, T> DoParse<TToken, T>(Parser<TToken, T> parser, IParseState<TToken> state)
         {
             using (state)  // ensure we return the state's buffer to the buffer pool
             {
                 state.Advance();  // pull the first element from the input
-                var result = parser.Parse(state);
-                if (!result.Success)
-                {
-                    return new Result<TToken, T>(result.ConsumedInput, state.Error);
-                }
-                return new Result<TToken, T>(result.ConsumedInput, result.Value);
+                return parser.Parse(state).ToResult(state);
             }
         }
 

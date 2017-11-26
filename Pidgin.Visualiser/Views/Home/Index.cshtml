@@ -1,0 +1,45 @@
+﻿@model IndexViewModel
+
+<h1>Loaded assemblies</h1>
+<ul>
+    @foreach (var name in Model.LoadedAssemblies)
+    {
+        <li>@name</li>
+    }
+</ul>
+
+@if (!Model.LoadedAssemblies.Any())
+{
+    <form asp-controller="Home" asp-action="LoadAssembly" method="post">
+        <label for="assemblyFile">Assembly file path</label><input name="assemblyFile" />
+        <input type="submit"/>
+    </form>
+}
+else if (Model.ParserName == null)
+{
+    <h1>Load parser</h1>
+
+    <form asp-controller="Home" asp-action="LoadParser">
+        <label for="expr">Static property</label><input name="expr" />
+        <input type="submit"/>
+    </form>
+}
+else if (@Model.Input == null)
+{
+    <div>@Model.ParserName</div>
+
+    <h1>Run parser</h1>
+
+    <form asp-controller="Home" asp-action="RunParser">
+        <label for="input">Input string</label><input name="input" />
+        <input type="submit"/>
+    </form>
+}
+else
+{
+    <div>@Model.Input</div>
+    <div>@Model.Pos</div>
+    <form asp-controller="Home" asp-action="ContinueParser">
+        <input type="submit"/>
+    </form>
+}

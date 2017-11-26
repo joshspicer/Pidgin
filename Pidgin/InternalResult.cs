@@ -1,3 +1,5 @@
+using Pidgin.ParseStates;
+
 namespace Pidgin
 {
     internal static class InternalResult
@@ -23,5 +25,10 @@ namespace Pidgin
             ConsumedInput = consumedInput;
             Value = value;
         }
+
+        public Result<TToken, T> ToResult<TToken>(IParseState<TToken> state)
+            => Success
+                ? new Result<TToken, T>(ConsumedInput, Value)
+                : new Result<TToken, T>(ConsumedInput, state.Error);
     }
 }

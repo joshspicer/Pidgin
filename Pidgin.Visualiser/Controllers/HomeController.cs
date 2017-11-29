@@ -49,7 +49,7 @@ namespace Pidgin.Visualiser.Controllers
         [HttpPost]
         public IActionResult RunParser(string input)
         {
-            ParserProcess.Instance.Run(input);
+            ParserProcess.Instance.SetInput(input);
             return RedirectToAction("Index");
         }
 
@@ -57,7 +57,14 @@ namespace Pidgin.Visualiser.Controllers
         [HttpPost]
         public IActionResult ContinueParser()
         {
-            ParserProcess.Instance.Continue();
+            if (!ParserProcess.Instance.IsRunning)
+            {
+                ParserProcess.Instance.Run();
+            }
+            else
+            {
+                ParserProcess.Instance.Continue();
+            }
             return RedirectToAction("Index");
         }
     }

@@ -10,19 +10,18 @@ namespace Pidgin.Visualiser.Models
     {
         private readonly object _parser;
         public string Name { get; }
-        private readonly BlockingCollection<ConsumeTokenEvent<char>> _input;
+        private readonly BlockingCollection<int> _input;
         private readonly BlockingCollection<object> _output;
-        private readonly VisualiserEventHandler _eventHandler;
         public string Input { get; private set; }
         public int? Pos { get; private set; }
+        public bool IsRunning { get; private set; }
 
         public ParserProcess(object parser, string name)
         {
             _parser = parser;
             Name = name;
-            _input = new BlockingCollection<ConsumeTokenEvent<char>>(1);
+            _input = new BlockingCollection<int>(1);
             _output = new BlockingCollection<object>(1);
-            _eventHandler = new VisualiserEventHandler(_input, _output);
         }
 
         public static void Initialise(string parserExpr)
@@ -39,9 +38,13 @@ namespace Pidgin.Visualiser.Models
             Instance = new ParserProcess(type.GetProperty(propertyName).GetValue(null), parserExpr);
         }
 
-        public void Run(string input)
+        public void SetInput(string input)
         {
             Input = input;
+        }
+
+        public void Run()
+        {
             var thread = new Thread(
                 () =>
                 {
@@ -49,22 +52,23 @@ namespace Pidgin.Visualiser.Models
                         .GetMethods()
                         .Single(m => m.Name == "ParseDebug" && m.GetGenericArguments().Length == 1)
                         .MakeGenericMethod(_parser.GetType().GenericTypeArguments[1])
-                        .Invoke(null, new object[] { _parser, input, _eventHandler, null });
+                        .Invoke(null, new object[] { _parser, Input, new VisualiserEventHandler(_input, _output), null });
                 }
             )
             {
                 IsBackground = true
             };
             thread.Start();
-            var evt = _input.Take();
-            Pos = evt.NewPos;
+            IsRunning = true;
+            var newPos = _input.Take();
+            Pos = newPos;
         }
 
         public void Continue()
         {
             _output.Add(new object());
-            var evt = _input.Take();
-            Pos = evt.NewPos;
+            var newPos = _input.Take();
+            Pos = newPos;
         }
 
         public static ParserProcess Instance { get; private set; }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pidgin.Diagnostics.Events;
 using Pidgin.ParseStates;
 
@@ -35,6 +36,7 @@ namespace Pidgin.Diagnostics
             if (_pos == -1)
             {
                 _pos++;
+                _eventHandler.OnStartParse(new StartParseEvent());
                 return;
             }
             var consumedToken = GetCurrent();
@@ -58,19 +60,19 @@ namespace Pidgin.Diagnostics
         public void PushBookmark()
         {
             _bookmarks.Push(new Positioned<int>(_pos, SourcePos));
-            _eventHandler.OnBookmark(new BookmarkEvent());
+            _eventHandler.OnBookmark(new BookmarkEvent(_pos, SourcePos));
         }
         public void PopBookmark()
         {
-            _bookmarks.Pop();
-            _eventHandler.OnDiscardBookmark(new DiscardBookmarkEvent());
+            var bookmark = _bookmarks.Pop();
+            _eventHandler.OnDiscardBookmark(new DiscardBookmarkEvent(bookmark.Value, bookmark.Pos));
         }
         public void Rewind()
         {
             var bookmark = _bookmarks.Pop();
             _pos = bookmark.Value;
             SourcePos = bookmark.Pos;
-            _eventHandler.OnBacktrack(new BacktrackEvent());
+            _eventHandler.OnBacktrack(new BacktrackEvent(_pos, SourcePos));
         }
 
         public void Dispose()

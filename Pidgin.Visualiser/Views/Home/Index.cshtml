@@ -37,8 +37,22 @@ else if (@Model.Input == null)
 }
 else
 {
-    <div>@Model.Input</div>
-    <div>@Model.Pos</div>
+    <table class="input-string">
+        <tbody>
+            <tr>
+                @foreach (var x in Model.Input.Select((c, i) => new { c, i }))
+                {
+                    <td class="input-token">@x.c</td>
+                }
+            </tr>
+            <tr>
+                @foreach (var x in Model.Input.Select((c, i) => new { c, i }))
+                {
+                    <td class="input-pointer">@(Model.Pos == x.i ? "↑" : "")</td>
+                }
+            </tr>
+        </tbody>
+    </table>
     <form asp-controller="Home" asp-action="ContinueParser">
         <input type="submit"/>
     </form>

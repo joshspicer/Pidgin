@@ -2,17 +2,13 @@ using System;
 using System.Buffers;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Pidgin
 {
     internal struct ExpectedCollector<TToken>
     {
-        private static readonly bool _needsClear =
-#if NETCOREAPP
-            System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<TToken>();
-#else
-            !typeof(TToken).IsPrimitive;
-#endif
+        private static readonly bool _needsClear = RuntimeHelpers.IsReferenceOrContainsReferences<TToken>();
         private static readonly Expected<TToken>[] _empty = new Expected<TToken>[]{};
 
         private bool _discard;

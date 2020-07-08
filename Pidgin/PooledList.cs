@@ -15,6 +15,8 @@ namespace Pidgin
     {
         private static readonly bool _needsClear = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
         private const int InitialCapacity = 16;
+
+        private readonly ArrayPool<T> _arrayPool;
         private T[]? _items;
         private int _count;
 
@@ -27,9 +29,10 @@ namespace Pidgin
             }
         }
 
-        public PooledList(int initialCapacity)
+        public PooledList(ArrayPool<T> arrayPool, int initialCapacity = InitialCapacity)
         {
-            _items = ArrayPool<T>.Shared.Rent(initialCapacity);
+            _arrayPool = arrayPool;
+            _items = _arrayPool.Rent(initialCapacity);
             _count = 0;
         }
 
@@ -98,7 +101,7 @@ namespace Pidgin
         {
             if (_items != null)
             {
-                ArrayPool<T>.Shared.Return(_items, _needsClear);
+                _arrayPool.Return(_items, _needsClear);
             }
             _items = null;
             _count = 0;
@@ -127,13 +130,13 @@ namespace Pidgin
         {
             if (_items == null)
             {
-                _items = ArrayPool<T>.Shared.Rent(Math.Max(InitialCapacity, additionalSpace));
+                _items = _arrayPool.Rent(Math.Max(InitialCapacity, additionalSpace));
             }
             else if (_count + additionalSpace >= _items.Length)
             {
-                var newBuffer = ArrayPool<T>.Shared.Rent(Math.Max(_items.Length * 2, _count + additionalSpace));
+                var newBuffer = _arrayPool.Rent(Math.Max(_items.Length * 2, _count + additionalSpace));
                 Array.Copy(_items, newBuffer, _count);
-                ArrayPool<T>.Shared.Return(_items, _needsClear);
+                _arrayPool.Return(_items, _needsClear);
                 _items = newBuffer;
             }
         }

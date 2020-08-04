@@ -100,7 +100,7 @@ namespace Pidgin
         public static Parser<char, char> Punctuation { get; } = Token(c => char.IsPunctuation(c)).Labelled("punctuation");
 
         /// <summary>
-        /// A parser that parses and returns a single Unicode symbol character
+        /// A parser that parses and returns a single Unicode symbol character (see https://docs.microsoft.com/en-us/dotnet/api/system.char.issymbol?view=netcore-3.1)
         /// </summary>
         /// <returns>A parser that parses and returns a single Unicode symbol character</returns>
         public static Parser<char, char> Symbol { get; } = Token(c => char.IsSymbol(c)).Labelled("symbol");
